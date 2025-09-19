@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Upload</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="sidebar">
+            <div class="brand">
+                <h3>RiSync with ASVI</h3>
+                <small>Talent Management</small>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="skills.html">Employee Skills</a>
+                <a href="analysis.html">Talent Analysis</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="bulk_upload.html" class="active">Bulk Upload</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="downloadSkillsData()">Export Data</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <h1>Bulk Skill Upload</h1>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <h2>Upload Skills from CSV</h2>
+                    <p>
+                        Please ensure your CSV file is formatted correctly with the following columns:
+                        <strong>"Employee Name", "Designation", "Experience", "Skill1", "Skill2", "Skill3",...</strong>
+                        <br>
+                        Proficiency for all skills will be set to a default of 3 (Intermediate) for this bulk upload.
+                    </p>
+                    <div class="form-group">
+                        <label for="csvFile">Choose CSV File</label>
+                        <input type="file" id="csvFile" accept=".csv">
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="handleBulkUpload()" class="primary">Upload and Process</button>
+                        <button onclick="generateSampleCSV()" class="secondary">Download Sample CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2024 RiSync with ASVI. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Skill Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="sidebar">
+            <div class="brand">
+                <h3>RiSync with <span style="color:#FF7F50" class="glowing-text">ASVI</span></h3>
+                <small>Talent Management</small>
+            </div>
+            <nav>
+                <a href="index.html" class="active">Home</a>
+                <a href="skills.html">Employee Skills</a>
+                <a href="analysis.html">Talent Analysis</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="bulk_upload.html">Bulk Upload</a>
+			</nav>
+            <div class="sidebar-footer">
+                <button onclick="downloadSkillsData()">Export Data</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <h1>Welcome to Talent Hub</h1>
+            </div>
+
+            <div class="content">
+                <div class="welcome-section">
+                    <p>Your solution for mapping, developing, and tracking employee skills.</p>
+                    <p>Use the navigation on the left to get started.</p>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2024 RiSync with ASVI. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+<div id="promo-popup" class="popup-container">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closePopup()">&times;</span>
+        <h2 class="promo-text">LEVEL UP YOUR SKILLS!</h2>
+        <div class="image-gallery">
+            <img src="images/promo1.jpg" alt="Promo Image 1" class="promo-image active">
+            <img src="images/promo2.jpg" alt="Promo Image 2" class="promo-image">
+            <img src="images/promo3.jpg" alt="Promo Image 3" class="promo-image">
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const popup = document.getElementById('promo-popup');
+        const images = document.querySelectorAll('.promo-image');
+        let currentImageIndex = 0;
+
+        // Function to show the pop-up
+        function showPopup() {
+            popup.classList.add('show');
+        }
+
+        // Function to close the pop-up
+        window.closePopup = function() {
+            popup.classList.remove('show');
+        }
+
+        // Function to cycle through images
+        function cycleImages() {
+            images[currentImageIndex].classList.remove('active');
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            images[currentImageIndex].classList.add('active');
+        }
+
+        // Show the pop-up after a delay (e.g., 2 seconds)
+        setTimeout(showPopup, 2000);
+
+        // Cycle images every 3 seconds
+        setInterval(cycleImages, 3000);
+    });
+</script>
+</body>
+</html>

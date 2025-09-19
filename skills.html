@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Skills</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="sidebar">
+            <div class="brand">
+                <h3>RiSync with ASVI</h3>
+                <small>Talent Management</small>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="skills.html" class="active">Employee Skills</a>
+                <a href="analysis.html">Talent Analysis</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="bulk_upload.html">Bulk Upload</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="downloadSkillsData()">Export Data</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <h1>Employee Skills Management</h1>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <h2>Add New Employee Skills</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="employeeName">Employee Name</label>
+                            <input type="text" id="employeeName" placeholder="e.g., Jane Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeDesignation">Designation</label>
+                            <input type="text" id="employeeDesignation" placeholder="e.g., Senior Software Engineer">
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeExperience">Experience (years)</label>
+                            <input type="number" id="employeeExperience" min="0" placeholder="e.g., 5">
+                        </div>
+                        <div class="form-group">
+                            <label for="skillName">Skill Name</label>
+                            <input type="text" id="skillName" placeholder="e.g., Python, SQL (separate with commas)">
+                        </div>
+                        <div class="form-group">
+                            <label for="skillProficiency">Proficiency (1-5)</label>
+                            <select id="skillProficiency">
+                                <option value="1">1 (Beginner)</option>
+                                <option value="2">2 (Novice)</option>
+                                <option value="3">3 (Intermediate)</option>
+                                <option value="4">4 (Advanced)</option>
+                                <option value="5">5 (Expert)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="addSkill()" class="primary">Add Skill</button>
+                    </div>
+                </div>
+
+                <div class="card" id="editSkillCard" style="display: none;">
+                    <h2>Edit Skill</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="editEmployeeName">Employee Name</label>
+                            <input type="text" id="editEmployeeName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="editSkillName">Skill Name</label>
+                            <input type="text" id="editSkillName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="editSkillProficiency">New Proficiency (1-5)</label>
+                            <select id="editSkillProficiency">
+                                <option value="1">1 (Beginner)</option>
+                                <option value="2">2 (Novice)</option>
+                                <option value="3">3 (Intermediate)</option>
+                                <option value="4">4 (Advanced)</option>
+                                <option value="5">5 (Expert)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="saveEditedSkill()" class="primary">Save Changes</button>
+                        <button onclick="cancelEdit()" class="secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2024 RiSync with ASVI. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

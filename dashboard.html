@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizational Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="sidebar">
+            <div class="brand">
+                <h3>RiSync with ASVI</h3>
+                <small>Talent Management</small>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="skills.html">Employee Skills</a>
+                <a href="analysis.html">Talent Analysis</a>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="bulk_upload.html">Bulk Upload</a>
+
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="downloadSkillsData()">Export Data</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <h1>Organizational Dashboard</h1>
+            </div>
+
+            <div class="content">
+                <div class="grid dashboard-grid">
+                    <div class="metric-card">
+                        <h3>Total Employees</h3>
+                        <p id="employeeCount">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Total Skills Mapped</h3>
+                        <p id="totalSkillsMapped">0</p>
+                    </div>
+                    <div class="metric-card" style="grid-column: span 2;">
+                        <h3>AI Readiness Score</h3>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="aiReadinessBar"></div>
+                        </div>
+                        <div class="progress-label" id="aiReadinessValue">0% Ready</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Data Management</h2>
+                    <p>Export all employee skill data to a CSV file for backup or analysis.</p>
+                    <button onclick="downloadSkillsData()" class="primary">Download All Data</button>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2024 RiSync with ASVI. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
