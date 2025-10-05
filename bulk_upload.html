@@ -6,6 +6,93 @@
     <title>Bulk Upload</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+	/* === Sidebar Responsive Hamburger === */
+.sidebar-toggle {
+    display: none;
+    font-size: 1.8em;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+@media (max-width: 768px) {
+    nav {
+        display: none;
+        flex-direction: column;
+        background-color: #26467B;
+        width: 100%;
+    }
+    nav.show {
+        display: flex;
+    }
+    .sidebar-toggle {
+        display: block;
+    }
+}
+
+/* === Card Upgrade === */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    border-left: 6px solid #5E2A7E;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* === Custom File Input === */
+.form-group input[type="file"] {
+    display: none;
+}
+.form-group label {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #5E2A7E;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.form-group label:hover {
+    background: #4A2066;
+}
+
+/* === Button Glow === */
+button.primary {
+    background: linear-gradient(135deg, #5E2A7E, #F7941E);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(94,42,126,0.3);
+}
+button.primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(94,42,126,0.5);
+}
+
+button.secondary {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+}
+button.secondary:hover {
+    background: #f0f0f0;
+}
+
+/* === Smooth Fade-In Animation === */
+.content, .sidebar, .topbar {
+    animation: fadeInUp 0.6s ease;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+</style>
 </head>
 <body>
 
