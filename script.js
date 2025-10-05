@@ -3,50 +3,9 @@
 // Using localStorage for data persistence
 let employees = JSON.parse(localStorage.getItem('employees')) || [];
 
-// --- 1. Role Library and LMS Modules (For Gap Analysis) ---
-/**
- * 1. Library of role and associated skills are mapped on our platform
- */
-const REQUIRED_SKILLS = {
-    'Senior Software Engineer': {
-        'JavaScript': 5,
-        'React': 5,
-        'Node.js': 4,
-        'Cloud Computing': 3,
-        'Data Structures': 4
-    },
-    'Team Lead': {
-        'Project Management': 5,
-        'Communication': 4,
-        'Mentorship': 4,
-        'Node.js': 3,
-        'Agile Methodology': 5
-    },
-    'UX Designer': {
-        'Figma': 5,
-        'User Research': 4,
-        'Prototyping': 5,
-        'HTML/CSS': 3,
-        'Visual Design': 4
-    },
-    'AI Specialist': {
-        'Python': 5,
-        'Machine Learning': 4,
-        'Statistical Analysis': 4,
-        'Data Structures': 3
-    }
-};
+// --- Core Functions ---
 
-const LMS_MODULES = {
-    1: 'Foundation Course (LMS-101)',
-    2: 'Intermediate Workshop (LMS-202)',
-    3: 'Advanced Certification (LMS-303)',
-    4: 'Expert Masterclass (LMS-404)',
-    5: 'External Specialization (LMS-505)'
-};
-
-// --- CORE FUNCTIONS (EXISTING) ---
-
+// Adds a new employee or a new skill to an existing employee
 function addSkill() {
     const employeeName = document.getElementById('employeeName').value.trim();
     const employeeDesignation = document.getElementById('employeeDesignation').value.trim();
@@ -58,7 +17,8 @@ function addSkill() {
         alert('Please enter both employee name and at least one skill name.');
         return;
     }
-
+    
+    // Split the input string by commas and remove leading/trailing spaces
     const skills = skillNamesInput.split(',').map(skill => skill.trim());
 
     let employee = employees.find(e => e.name === employeeName);
@@ -72,6 +32,7 @@ function addSkill() {
         employees.push(employee);
     }
     
+    // Update existing employee's designation and experience if provided
     if (employeeDesignation) {
         employee.designation = employeeDesignation;
     }
@@ -79,28 +40,33 @@ function addSkill() {
         employee.experience = employeeExperience;
     }
     
+    // Loop through each skill and add it to the employee's profile
     skills.forEach(skill => {
-        if (skill) {
+        if (skill) { // Ensure the skill name is not empty
             employee.skills[skill] = skillProficiency;
         }
     });
 
+    // Save data to localStorage
     localStorage.setItem('employees', JSON.stringify(employees));
     alert(`Skills added for ${employeeName}: ${skills.join(', ')}`);
     
+    // Reload the skills page to show the update
     window.location.href = 'skills.html';
 }
 
+// Renders the skills matrix table on the skills.html page
 function renderSkillsMatrix() {
     const tableBody = document.getElementById('skillsMatrixTableBody');
     if (!tableBody) return;
-    tableBody.innerHTML = '';
+    tableBody.innerHTML = ''; // Clear existing content
 
     employees.forEach(employee => {
         const newRow = tableBody.insertRow();
         const cellEmployee = newRow.insertCell(0);
         const cellSkills = newRow.insertCell(1);
 
+        // Display the designation and experience fields
         const employeeInfo = `
             <strong>${employee.name}</strong><br>
             <small>${employee.designation || 'N/A'}</small><br>
@@ -110,9 +76,13 @@ function renderSkillsMatrix() {
 
         let skillText = '';
         const skillArray = Object.keys(employee.skills);
-        skillArray.forEach(skill => {
+        // This part now also displays the count of total skills
+        skillArray.forEach((skill, index) => {
             const proficiency = employee.skills[skill];
             skillText += `<span class="skill-prof-${proficiency}">${skill} (${proficiency})</span>`;
+            if (index < skillArray.length - 1) {
+                skillText += `, `;
+            }
         });
         
         const totalSkillsCount = skillArray.length;
@@ -120,6 +90,7 @@ function renderSkillsMatrix() {
     });
 }
 
+// Renders dashboard metrics
 function renderDashboard() {
     const employeeCount = document.getElementById('employeeCount');
     const totalSkillsMapped = document.getElementById('totalSkillsMapped');
@@ -134,6 +105,7 @@ function renderDashboard() {
     employees.forEach(emp => totalSkills += Object.keys(emp.skills).length);
     totalSkillsMapped.textContent = totalSkills;
 
+    // Example KPI: Calculate readiness for the AI adoption goal
     const aiReadinessSkills = ['Python', 'Machine Learning', 'Data Analysis'];
     let totalPossibleScore = 0;
     let totalCurrentScore = 0;
@@ -152,11 +124,40 @@ function renderDashboard() {
     aiReadinessValue.textContent = `${readinessPercentage.toFixed(1)}% Ready`;
 }
 
-// Populates dropdowns for employees on the analysis and gap_analysis pages
+// Populates dropdowns for employees on the analysis.html page
+function populateAnalysisDropdowns() {
+    const designationDropdown = document.getElementById('designationFilter');
+    const employeeDropdown = document.getElementById('analysisEmployee');
+
+    if (!designationDropdown || !employeeDropdown) return;
+    
+    // Populate Designation dropdown
+    designationDropdown.innerHTML = '<option value="">-- All Designations --</option>';
+    const uniqueDesignations = new Set(employees.map(e => e.designation).filter(Boolean));
+    uniqueDesignations.forEach(designation => {
+        const option = document.createElement('option');
+        option.value = designation;
+        option.textContent = designation;
+        designationDropdown.appendChild(option);
+    });
+
+    // Populate Employee dropdown with all employees initially
+    populateEmployeeDropdown(employees);
+}
+
+// NEW: Function to filter employees based on selected designation
+function filterEmployeesByDesignation() {
+    const designation = document.getElementById('designationFilter').value;
+    const filteredEmployees = employees.filter(emp => !designation || emp.designation === designation);
+    populateEmployeeDropdown(filteredEmployees);
+    // Clear the skills output when the designation filter changes
+    document.getElementById('analysisEmployee').value = '';
+    document.getElementById('skillsOutput').style.display = 'none';
+}
+
+// Helper function to populate the employee dropdown
 function populateEmployeeDropdown(employeeList) {
     const employeeDropdown = document.getElementById('analysisEmployee');
-    if (!employeeDropdown) return;
-    
     employeeDropdown.innerHTML = '<option value="">-- Select Employee --</option>';
     employeeList.forEach(emp => {
         const option = document.createElement('option');
@@ -166,50 +167,16 @@ function populateEmployeeDropdown(employeeList) {
     });
 }
 
-function populateAnalysisDropdowns() {
-    const designationDropdown = document.getElementById('designationFilter');
-    if (designationDropdown) {
-        designationDropdown.innerHTML = '<option value="">-- All Designations --</option>';
-        const uniqueDesignations = new Set(employees.map(e => e.designation).filter(Boolean));
-        uniqueDesignations.forEach(designation => {
-            const option = document.createElement('option');
-            option.value = designation;
-            option.textContent = designation;
-            designationDropdown.appendChild(option);
-        });
-    }
-
-    populateEmployeeDropdown(employees);
-}
-
-function filterEmployeesByDesignation() {
-    const designation = document.getElementById('designationFilter').value;
-    const filteredEmployees = employees.filter(emp => !designation || emp.designation === designation);
-    populateEmployeeDropdown(filteredEmployees);
-    
-    const analysisEmployee = document.getElementById('analysisEmployee');
-    if (analysisEmployee) analysisEmployee.value = '';
-
-    const skillsOutput = document.getElementById('skillsOutput');
-    if (skillsOutput) skillsOutput.style.display = 'none';
-
-    const gapAnalysisOutput = document.getElementById('gapAnalysisOutput');
-    if (gapAnalysisOutput) gapAnalysisOutput.style.display = 'none';
-}
-
-/**
- * Displays the skills of the selected employee (The As-Is Placement).
- */
+// NEW: Function to display the skills of the selected employee
 function displayEmployeeSkills() {
     const employeeName = document.getElementById('analysisEmployee').value;
     const skillsOutputDiv = document.getElementById('skillsOutput');
     skillsOutputDiv.innerHTML = '';
-    skillsOutputDiv.style.display = 'none';
+    skillsOutputDiv.style.display = 'none'; // Hide the card by default
 
-    const gapAnalysisOutput = document.getElementById('gapAnalysisOutput');
-    if (gapAnalysisOutput) gapAnalysisOutput.style.display = 'none';
-
-    if (!employeeName) return;
+    if (!employeeName) {
+        return; // Exit if no employee is selected
+    }
 
     const employee = employees.find(e => e.name === employeeName);
     if (!employee) {
@@ -218,12 +185,12 @@ function displayEmployeeSkills() {
     }
 
     let skillsHTML = `
-        <h2>Current Skills Placement: ${employee.name}</h2>
+        <h2>Skills for ${employee.name}</h2>
         <table class="table">
             <thead>
                 <tr>
                     <th>Skill</th>
-                    <th>Proficiency (1-5)</th>
+                    <th>Proficiency</th>
                 </tr>
             </thead>
             <tbody>
@@ -236,216 +203,236 @@ function displayEmployeeSkills() {
             skillsHTML += `
                 <tr>
                     <td>${skill}</td>
-                    <td><span class="skill-prof-${employee.skills[skill]}">${employee.skills[skill]}</span></td>
+                    <td>${employee.skills[skill]}</td>
                 </tr>
             `;
         }
     }
-
+    
     skillsHTML += `</tbody></table>`;
+    
     skillsOutputDiv.innerHTML = skillsHTML;
-    skillsOutputDiv.style.display = 'block';
-}
-
-
-// --- 2. New Gap Analysis Functions ---
-
-/**
- * Populates the 'Target Role' dropdown with roles from employee designations (the 'roles we added in skills.html').
- */
-function populateTargetRoleDropdown() {
-    const targetRoleSelect = document.getElementById('targetRole');
-    if (!targetRoleSelect) return;
-
-    targetRoleSelect.innerHTML = '<option value="">-- Select Aspiring Role --</option>';
-    
-    // Get unique designations from all employees (the roles added in skills.html)
-    const uniqueDesignations = new Set(employees.map(e => e.designation).filter(d => d));
-    const rolesFromEmployees = Array.from(uniqueDesignations).sort();
-
-    rolesFromEmployees.forEach(role => {
-        const option = document.createElement('option');
-        option.value = role;
-        option.textContent = role;
-        targetRoleSelect.appendChild(option);
-    });
+    skillsOutputDiv.style.display = 'block'; // Show the card
 }
 
 /**
- * Runs the Skill Gap Analysis for the selected employee and target role.
+ * Converts the employees data to a CSV format and triggers a download.
  */
-function runGapAnalysis() {
-    const employeeSelect = document.getElementById('analysisEmployee');
-    const targetRoleSelect = document.getElementById('targetRole');
-    const outputDiv = document.getElementById('gapAnalysisOutput');
-
-    const employeeName = employeeSelect.value;
-    const targetRole = targetRoleSelect.value;
-
-    outputDiv.style.display = 'none';
-
-    if (!employeeName || !targetRole) {
-        outputDiv.style.display = 'block';
-        outputDiv.innerHTML = `<h2>Skill Gap Analysis</h2><p class="disclaimer">Please select both an employee and an aspired role to run the analysis.</p>`;
-        return;
-    }
-
-    const employee = employees.find(e => e.name === employeeName);
-    const requiredSkills = REQUIRED_SKILLS[targetRole]; // This is the line that requires the selected role to be in REQUIRED_SKILLS
-
-    if (!employee || !requiredSkills) {
-        outputDiv.style.display = 'block';
-        // MODIFIED MESSAGE to reflect that the role needs to be defined in REQUIRED_SKILLS
-        let message = `<p class="disclaimer">Required skills data not available for target role: <strong>${targetRole}</strong>.</p>`;
-        if (REQUIRED_SKILLS[targetRole] === undefined) {
-             message += `<p class="disclaimer">The selected role (<strong>${targetRole}</strong>) is not a defined Target Role in our skill library (REQUIRED_SKILLS). Please select one of the following roles for a successful gap analysis: ${Object.keys(REQUIRED_SKILLS).join(', ')}.</p>`;
-        }
-        
-        outputDiv.innerHTML = `<h2>Skill Gap Analysis Failed</h2>${message}`;
-        return;
-    }
-
-    let tableHTML = `
-        <h2>Skill Gap: Upskilling Path to ${targetRole}</h2>
-        <table class="table analysis-table">
-            <thead>
-                <tr>
-                    <th>Skill</th>
-                    <th>Required Prof. (1-5)</th>
-                    <th>Current Prof. (1-5)</th>
-                    <th>Gap (Deficit is negative)</th>
-                    <th>LMS Recommendation</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    let totalDeficit = 0;
-    let skillsToDevelopCount = 0;
-
-    // 1. Check required skills against employee skills
-    for (const skill in requiredSkills) {
-        const requiredProf = requiredSkills[skill];
-        // Ensure case-insensitive match for employee skills
-        const foundSkillKey = Object.keys(employee.skills).find(skillKey => skillKey.toLowerCase() === skill.toLowerCase());
-        const currentProf = foundSkillKey ? employee.skills[foundSkillKey] : 0; // Default to 0 if skill not recorded
-        const gap = currentProf - requiredProf;
-
-        let gapClass = '';
-        let recommendation = 'Meets or Exceeds Requirement';
-        
-        if (gap < 0) {
-            totalDeficit += Math.abs(gap);
-            skillsToDevelopCount++;
-            gapClass = 'analysis-negative'; 
-            const proficiencyNeeded = Math.abs(gap);
-            recommendation = LMS_MODULES[proficiencyNeeded] || 'Tailored Development Plan';
-        } else if (gap > 0) {
-            gapClass = 'analysis-positive'; 
-            recommendation = 'Potential Mentor / Exceeds Role Requirement';
-        } else {
-            gapClass = '';
-        }
-
-        const currentProfClass = `skill-prof-${currentProf > 5 ? 5 : currentProf}`;
-        const requiredProfClass = `skill-prof-${requiredProf > 5 ? 5 : requiredProf}`;
-
-
-        tableHTML += `
-            <tr>
-                <td>${skill}</td>
-                <td><span class="${requiredProfClass}">${requiredProf}</span></td>
-                <td><span class="${currentProfClass}">${currentProf}</span></td>
-                <td class="${gapClass}"><strong>${gap}</strong></td>
-                <td>${recommendation}</td>
-            </tr>
-        `;
-    }
-    
-    // 2. Identify surplus skills
-    for (const skill in employee.skills) {
-        const requiredSkillKeys = Object.keys(requiredSkills).map(s => s.toLowerCase());
-        if (!requiredSkillKeys.includes(skill.toLowerCase())) {
-             tableHTML += `
-                <tr>
-                    <td>${skill}</td>
-                    <td>-</td>
-                    <td><span class="skill-prof-${employee.skills[skill]}">${employee.skills[skill]}</span></td>
-                    <td class="analysis-positive">SURPLUS</td>
-                    <td>Value-add skill, consider for special projects or other roles.</td>
-                </tr>
-            `;
-        }
-    }
-
-
-    tableHTML += `</tbody></table>`;
-    
-    // --- Summary Metrics ---
-    const maxDeficitPossible = Object.keys(requiredSkills).length * 5;
-    const gapScore = maxDeficitPossible > 0 ? Math.max(0, 100 - (totalDeficit / maxDeficitPossible) * 100) : 100;
-
-    let color;
-    if (gapScore < 50) {
-        color = '#DC2626';
-    } else if (gapScore < 85) {
-        color = '#F59E0B';
-    } else {
-        color = '#059669';
-    }
-
-
-    tableHTML += `
-        <div class="dashboard-grid" style="margin-top: 30px;">
-            <div class="metric-card" style="border-left-color: ${color};">
-                <h3>Overall Readiness Score</h3>
-                <p style="color: ${color};">${gapScore.toFixed(0)}/100</p>
-                <small>Score based on total proficiency deficit against the target role.</small>
-            </div>
-            <div class="metric-card" style="border-left-color: #0570C7;">
-                <h3>Skills Requiring Upskilling</h3>
-                <p style="color: #0570C7;">${skillsToDevelopCount}</p>
-                <small>Number of skills where current level is below required level.</small>
-            </div>
-            <div class="metric-card" style="border-left-color: #1F2937;">
-                <h3>Total Proficiency Deficit</h3>
-                <p style="color: #1F2937;">${totalDeficit}</p>
-                <small>Total points needed to meet all minimum requirements.</small>
-            </div>
-        </div>
-    `;
-
-    outputDiv.innerHTML = tableHTML;
-    outputDiv.style.display = 'block';
-}
-
 function downloadSkillsData() {
-    // Existing download logic...
-}
-function handleBulkUpload() {
-    // Existing bulk upload logic...
-}
-function generateSampleCSV() {
-    // Existing generate sample CSV logic...
+    // Check if there are employees to export
+    if (employees.length === 0) {
+        alert("No employee data to export.");
+        return;
+    }
+
+    // 1. Prepare the CSV header
+    // Start with the employee name, designation, and experience
+    let csvContent = "Employee Name,Designation,Experience,";
+
+    // Get all unique skill names from all employees to create the header
+    const allSkills = new Set();
+    employees.forEach(emp => {
+        Object.keys(emp.skills).forEach(skill => {
+            allSkills.add(skill);
+        });
+    });
+
+    const skillArray = Array.from(allSkills);
+    csvContent += skillArray.join(",") + "\n"; // Add skills and a newline
+
+    // 2. Generate the CSV rows
+    employees.forEach(emp => {
+        // Quote the fields to handle commas
+        let row = `"${emp.name || 'N/A'}",`;
+        row += `"${emp.designation || 'N/A'}",`;
+        row += `"${emp.experience !== undefined ? emp.experience : 'N/A'}",`;
+        
+        const skillsRow = skillArray.map(skill => {
+            // Get the proficiency level, or 0 if the skill is not present
+            return emp.skills[skill] || 0;
+        });
+        row += skillsRow.join(",") + "\n";
+        csvContent += row;
+    });
+
+    // 3. Create a downloadable file
+    // Create a Blob from the CSV content with a specific MIME type
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temporary link element to trigger the download
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "employee_skills_data.csv");
+    link.style.display = 'none'; // Hide the link
+
+    // Append the link to the body, click it, and then remove it
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    alert("Skills data downloaded successfully!");
 }
 
+// --- Page-Specific Loaders ---
 
-// --- Page-Specific Loaders (UPDATED) ---
-
+// This function runs when any of the pages loads.
+// It checks the current page's file name to call the right functions.
 document.addEventListener('DOMContentLoaded', () => {
     const currentPage = window.location.pathname.split('/').pop();
 
     if (currentPage === 'skills.html') {
         renderSkillsMatrix();
     } else if (currentPage === 'analysis.html') {
-        // Talent Analysis (Team view, uses designation filter)
         populateAnalysisDropdowns();
-    } else if (currentPage === 'gap_analysis.html') {
-        // Skill Gap Analysis (Individual view, uses employee and target role)
-        populateEmployeeDropdown(employees);
-        populateTargetRoleDropdown();
     } else if (currentPage === 'dashboard.html') {
         renderDashboard();
     }
-    // No specific loader for index.html or bulk_upload.html needed here.
+});
+// Add these new functions to your script.js file
+
+/**
+ * Handles the bulk upload of a CSV file.
+ * Reads the file, parses the data, and updates the employees array.
+ */
+function handleBulkUpload() {
+    const fileInput = document.getElementById('csvFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a CSV file to upload.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const csvContent = event.target.result;
+        processCSVData(csvContent);
+    };
+    reader.readAsText(file);
+}
+
+/**
+ * Parses the CSV content and updates the employees array in localStorage.
+ * @param {string} csvContent The content of the CSV file as a string.
+ */
+function processCSVData(csvContent) {
+    const lines = csvContent.split('\n').filter(line => line.trim() !== '');
+    if (lines.length <= 1) {
+        alert("The CSV file is empty or has only a header.");
+        return;
+    }
+
+    const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
+    const employeeData = lines.slice(1);
+
+    employeeData.forEach(line => {
+        const values = parseCSVLine(line);
+        if (values.length < headers.length) return; // Skip malformed rows
+
+        const employeeName = values[headers.indexOf('Employee Name')];
+        const designation = values[headers.indexOf('Designation')];
+        const experience = values[headers.indexOf('Experience')];
+
+        if (!employeeName) return;
+
+        let employee = employees.find(e => e.name === employeeName);
+        if (!employee) {
+            employee = {
+                name: employeeName,
+                designation: designation,
+                experience: parseInt(experience, 10) || 0,
+                skills: {}
+            };
+            employees.push(employee);
+        } else {
+            // Update existing employee's details
+            employee.designation = designation || employee.designation;
+            employee.experience = parseInt(experience, 10) || employee.experience;
+        }
+
+        // Add skills from the remaining columns
+        for (let i = 3; i < headers.length; i++) {
+            const skillName = headers[i];
+            // We'll assume a default proficiency of 3 (Intermediate) for bulk upload
+            // We could enhance this to read proficiency values from the CSV as well
+            if (skillName && values[i] && values[i] !== "0") {
+                employee.skills[skillName] = parseInt(values[i], 10) || 3;
+            }
+        }
+    });
+
+    localStorage.setItem('employees', JSON.stringify(employees));
+    alert('Bulk upload successful! Employee skills have been updated.');
+    // Redirect or reload to see changes
+    window.location.href = 'skills.html';
+}
+
+/**
+ * Parses a single line of CSV, handling commas within quoted fields.
+ * @param {string} line The CSV line to parse.
+ * @returns {string[]} An array of values.
+ */
+function parseCSVLine(line) {
+    const result = [];
+    let inQuote = false;
+    let currentField = '';
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"' && (i === 0 || line[i - 1] === ',')) {
+            inQuote = true;
+        } else if (char === '"' && line[i + 1] === ',') {
+            inQuote = false;
+        } else if (char === ',' && !inQuote) {
+            result.push(currentField.trim().replace(/"/g, ''));
+            currentField = '';
+        } else {
+            currentField += char;
+        }
+    }
+    result.push(currentField.trim().replace(/"/g, ''));
+    return result;
+}
+
+/**
+ * Generates and downloads a sample CSV file to show the required format.
+ */
+function generateSampleCSV() {
+    const headers = ["Employee Name", "Designation", "Experience", "Skill1", "Skill2", "Skill3"];
+    const sampleData = [
+        ["John Doe", "Software Engineer", 5, 5, 4, 3],
+        ["Jane Smith", "UX Designer", 3, 0, 4, 0]
+    ];
+
+    let csvContent = headers.join(",") + "\n";
+    sampleData.forEach(row => {
+        csvContent += row.map(item => `"${item}"`).join(",") + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "sample_bulk_upload.csv");
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Add a new conditional block to the existing DOMContentLoaded listener
+document.addEventListener('DOMContentLoaded', () => {
+    const currentPage = window.location.pathname.split('/').pop();
+
+    if (currentPage === 'skills.html') {
+        renderSkillsMatrix();
+    } else if (currentPage === 'analysis.html') {
+        populateAnalysisDropdowns();
+    } else if (currentPage === 'dashboard.html') {
+        renderDashboard();
+    } else if (currentPage === 'bulk_upload.html') {
+        // No specific function needed for this page yet, the button click will handle it
+        console.log("Bulk Upload page loaded.");
+    }
 });
