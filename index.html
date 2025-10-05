@@ -1,90 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Skill Management System</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RiSync — Talent Hub (Minimal, fixed)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Minimal style tweaks */
+    .hero { display:flex; gap:16px; align-items:center; justify-content:space-between; }
+    .hero-left { max-width:640px; }
+    .hero h1 { margin:0 0 8px 0; color:#26467B; font-size:1.6em; }
+    .cta-row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+    .stat-grid { display:flex; gap:12px; margin-top:12px; }
+    .stat { background:#fff; padding:12px; border-radius:8px; box-shadow:0 6px 14px rgba(0,0,0,0.04); text-align:center; min-width:160px; }
+    .stat h3 { margin:0; color:#5E2A7E; font-size:1em; }
+    .stat p { font-size:1.4em; margin:6px 0 0 0; color:#26467B; font-weight:800; }
+    .mini { padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; }
+    .small-note { color:#666; margin-top:8px; font-size:0.9em; }
+    ul { margin:8px 0 0 16px; padding:0; }
+    @media(max-width:700px){ .hero { flex-direction:column; align-items:flex-start } .stat-grid { flex-direction:column; } }
+    .muted { color:#666; font-size:0.95em; }
+  </style>
 </head>
 <body>
-
-    <div class="app-shell">
-        <div class="sidebar">
-            <div class="brand">
-                <h3>RiSync with <span style="color:#FF7F50" class="glowing-text">ASVI</span></h3>
-                <small>Talent Management</small>
-            </div>
-            <nav>
-                <a href="index.html" class="active">Home</a>
-                <a href="skills.html">Employee Skills</a>
-                <a href="analysis.html">Talent Analysis</a>
-				<a href="gap_analysis.html">Skill Gap Analysis</a>
-                <a href="dashboard.html">Dashboard</a>
-                <a href="bulk_upload.html">Bulk Upload</a>
-			</nav>
-            <div class="sidebar-footer">
-                <button onclick="downloadSkillsData()">Export Data</button>
-            </div>
-        </div>
-
-        <div class="main">
-            <div class="topbar">
-                <h1>Welcome to Talent Hub</h1>
-            </div>
-
-            <div class="content">
-                <div class="welcome-section">
-                    <p>Your solution for mapping, developing, and tracking employee skills.</p>
-                    <p>Use the navigation on the left to get started.</p>
-                </div>
-            </div>
-
-            <footer class="footer">
-                <p>&copy; 2025 RiSync with ASVI. All Rights Reserved.</p>
-            </footer>
-        </div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="brand">
+        <h3>RiSync with ASVI</h3>
+        <small>Talent Mgmt</small>
+      </div>
+      <nav>
+        <a href="index.html" class="active">Home</a>
+        <a href="skills.html">Skills</a>
+        <a href="analysis.html">Analysis</a>
+        <a href="gap_analysis.html">Gap</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="bulk_upload.html">Bulk Upload</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button onclick="downloadSkillsData()" class="primary mini">Export</button>
+      </div>
     </div>
-<div id="promo-popup" class="popup-container">
-    <div class="popup-content">
-        <span class="close-btn" onclick="closePopup()">&times;</span>
-        <h2 class="promo-text">LEVEL UP YOUR SKILLS!</h2>
-        <div class="image-gallery">
-            <img src="Save.png" alt="Promo Image 1" class="promo-image active">
-            <img src="Dashboard.png" alt="Promo Image 2" class="promo-image">
-            <img src="Skills.png" alt="Promo Image 3" class="promo-image">
+
+    <div class="main">
+      <div class="topbar">
+        <h1>Talent Hub — Minimal (Fixed)</h1>
+      </div>
+
+      <div class="content">
+        <div class="card hero">
+          <div class="hero-left">
+            <h1>Lightweight skills mapping</h1>
+            <p style="margin:0 0 10px 0; color:#444;">A minimal interface — fewer demo entries and less on-screen data.</p>
+
+            <div class="cta-row">
+              <button class="primary mini" onclick="generateTinySample()">Generate 1 Sample</button>
+              <button class="primary mini" onclick="location.href='skills.html'">Add Skill</button>
+              <button class="secondary mini" onclick="location.href='gap_analysis.html'">Gap Analysis</button>
+              <button class="mini" onclick="downloadSkillsData()">Export</button>
+              <button class="mini" onclick="trimToSingleSample()">Trim to 1 sample</button>
+            </div>
+
+            <div class="small-note">This mode stores minimal demo data (only 1 employee) to keep localStorage light. If you see a higher count, use "Trim to 1 sample" or "Clear".</div>
+          </div>
+
+          <div>
+            <div class="stat-grid">
+              <div class="stat">
+                <h3>Total Employees</h3>
+                <p id="statEmployees">0</p>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <label for="quickEmployee">Quick open:</label>
+              <select id="quickEmployee" style="width:100%; padding:8px; border-radius:8px; margin-top:8px;"></select>
+              <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="primary mini" onclick="openGapForSelected()">Open Gap</button>
+                <button class="secondary mini" onclick="clearAllData()">Clear</button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div class="card">
+          <h2>Activity</h2>
+          <div id="recentActivity" class="muted">No activity. Generate the single sample to see minimal entries.</div>
+        </div>
+
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2025 RiSync with ASVI. All Rights Reserved.</p>
+      </footer>
     </div>
-</div>
+  </div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const popup = document.getElementById('promo-popup');
-        const images = document.querySelectorAll('.promo-image');
-        let currentImageIndex = 0;
+/* Minimal index script — fix: render all employees in Activity and add a trim action */
 
-        // Function to show the pop-up
-        function showPopup() {
-            popup.classList.add('show');
-        }
+function getEmployees(){
+  try { return JSON.parse(localStorage.getItem('employees')) || []; } catch(e){ return []; }
+}
 
-        // Function to close the pop-up
-        window.closePopup = function() {
-            popup.classList.remove('show');
-        }
+function getPlans(){ try { return JSON.parse(localStorage.getItem('rns_learning_plans')) || []; } catch(e){ return []; } }
 
-        // Function to cycle through images
-        function cycleImages() {
-            images[currentImageIndex].classList.remove('active');
-            currentImageIndex = (currentImageIndex + 1) % images.length;
-            images[currentImageIndex].classList.add('active');
-        }
+function updateStats(){
+  const emps = getEmployees();
+  document.getElementById('statEmployees').textContent = emps.length;
+  populateQuickEmployeeDropdown();
+  renderRecentActivity();
+}
 
-        // Show the pop-up after a delay (e.g., 2 seconds)
-        setTimeout(showPopup, 2000);
+function populateQuickEmployeeDropdown(){
+  const sel = document.getElementById('quickEmployee');
+  sel.innerHTML = '<option value="">-- Select --</option>';
+  const emps = getEmployees();
+  emps.forEach(e=> { const o=document.createElement('option'); o.value=e.name; o.textContent=e.name; sel.appendChild(o); });
+  if(emps.length===0) sel.innerHTML = '<option value="">-- None --</option>';
+}
 
-        // Cycle images every 3 seconds
-        setInterval(cycleImages, 3000);
+function openGapForSelected(){
+  const name = document.getElementById('quickEmployee').value;
+  if(!name){ alert('Select an employee.'); return; }
+  location.href = 'gap_analysis.html#employee=' + encodeURIComponent(name);
+}
+
+function downloadCSV(filename, rows){
+  const csv = rows.map(r=> r.map(c=> {
+    if(typeof c==='string' && (c.includes(',')||c.includes('"')||c.includes('\n'))) return '"' + c.replace(/"/g,'""') + '"';
+    return c;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function downloadSkillsData(){
+  const employees = getEmployees();
+  if(!employees || employees.length===0){ alert('No data to export.'); return; }
+  const rows=[['Employee Name','Designation','Experience','Skills(JSON)']];
+  employees.forEach(e => rows.push([e.name,e.designation || '', e.experience || '', JSON.stringify(e.skills || {})]));
+  const filename = 'RiSync_employees_' + new Date().toISOString().slice(0,19).replace(/[:T]/g,'-') + '.csv';
+  downloadCSV(filename, rows);
+}
+
+function generateTinySample(){
+  const sample = [
+    { name:'Asha Patel', designation:'Software Engineer', experience:2, skills:{ 'JavaScript':3,'React':2 } }
+  ];
+  localStorage.setItem('employees', JSON.stringify(sample));
+  alert('Tiny sample generated (1 employee).');
+  updateStats();
+}
+
+function trimToSingleSample(){
+  const emps = getEmployees();
+  if(emps.length<=1){ alert('Already 1 or 0 employees.'); return; }
+  const first = emps[0];
+  localStorage.setItem('employees', JSON.stringify([first]));
+  alert('Trimmed to the first employee only: ' + (first.name||''));
+  updateStats();
+}
+
+function clearAllData(){
+  if(!confirm('Clear all stored data?')) return;
+  localStorage.removeItem('employees');
+  localStorage.removeItem('rns_learning_plans');
+  updateStats();
+  alert('Cleared.');
+}
+
+function renderRecentActivity(){
+  const container = document.getElementById('recentActivity');
+  const emps = getEmployees();
+  const plans = getPlans();
+  if(emps.length===0 && plans.length===0){ container.textContent = 'No activity. Generate the single sample to see minimal entries.'; return; }
+  let html = '';
+  if(emps.length>0){
+    html += '<div><strong>Employees:</strong><ul>';
+    emps.forEach(e => {
+      html += '<li>' + (e.name||'Unnamed') + (e.designation ? ' — ' + e.designation : '') + '</li>';
     });
+    html += '</ul></div>';
+  }
+  if(plans.length>0){
+    html += '<div style="margin-top:8px;"><strong>Saved Plans:</strong><ul>';
+    plans.forEach(p => {
+      html += '<li>' + p.employee + ' → ' + p.targetRole + ' (' + new Date(p.createdAt).toLocaleString() + ')</li>';
+    });
+    html += '</ul></div>';
+  }
+  container.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{ updateStats(); });
 </script>
 </body>
 </html>
