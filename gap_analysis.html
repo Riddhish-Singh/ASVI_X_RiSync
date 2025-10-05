@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-shell">
+        <div class="sidebar">
+            <div class="brand">
+                <h3>RiSync with ASVI</h3>
+                <small>Talent Management</small>
+            </div>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="skills.html">Employee Skills</a>
+                <a href="analysis.html">Talent Analysis</a>
+                <a href="gap_analysis.html" class="active">Skill Gap Analysis</a>
+				<a href="dashboard.html">Dashboard</a>
+				<a href="bulk_upload.html">Bulk Upload</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button onclick="downloadSkillsData()">Export Data</button>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="topbar">
+                <h1>Skill Gap Analysis: Role Readiness</h1>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <h2>Skill Gap Calculation</h2>
+                    <p>Select the current employee and their desired future role to calculate the skill gap. Roles are hardcoded in script.js.</p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="analysisEmployee">Select Employee (Current Placement)</label>
+                            <select id="analysisEmployee" onchange="displayEmployeeSkills()">
+                                </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="targetRole">Select Aspiring Role</label>
+                            <select id="targetRole">
+                                </select>
+                        </div>
+                    </div>
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button onclick="runGapAnalysis()" class="primary">Run Gap Analysis</button>
+                    </div>
+                </div>
+
+                <div class="card" id="skillsOutput" style="display: none;">
+                    </div>
+
+                <div class="card" id="gapAnalysisOutput" style="display: none;">
+                    </div>
+
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2025 RiSync with ASVI. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
