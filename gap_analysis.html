@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Skill Gap Analysis</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
@@ -20,8 +20,8 @@
                 <a href="skills.html">Employee Skills</a>
                 <a href="analysis.html">Talent Analysis</a>
                 <a href="gap_analysis.html" class="active">Skill Gap Analysis</a>
-				<a href="dashboard.html">Dashboard</a>
-				<a href="bulk_upload.html">Bulk Upload</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="bulk_upload.html">Bulk Upload</a>
             </nav>
             <div class="sidebar-footer">
                 <button onclick="downloadSkillsData()">Export Data</button>
@@ -35,30 +35,31 @@
 
             <div class="content">
                 <div class="card">
-                    <h2>Skill Gap Calculation</h2>
-                    <p>Select the current employee and their desired future role to calculate the skill gap. Roles are hardcoded in script.js.</p>
+                    <h2>Select Employee and Aspired Role</h2>
+                    <p>Select the current employee and their desired future role to calculate the skill gap. Roles are defined in the script below.</p>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="analysisEmployee">Select Employee (Current Placement)</label>
                             <select id="analysisEmployee" onchange="displayEmployeeSkills()">
-                                </select>
+                                <option value="">-- Loading employees --</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="targetRole">Select Aspiring Role</label>
                             <select id="targetRole">
-                                </select>
+                                <option value="">-- Loading roles --</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-actions" style="margin-top: 20px;">
                         <button onclick="runGapAnalysis()" class="primary">Run Gap Analysis</button>
+                        <button onclick="clearOutputs()" class="secondary">Clear Output</button>
                     </div>
                 </div>
 
-                <div class="card" id="skillsOutput" style="display: none;">
-                    </div>
+                <div class="card" id="skillsOutput" style="display: none;"></div>
 
-                <div class="card" id="gapAnalysisOutput" style="display: none;">
-                    </div>
+                <div class="card" id="gapAnalysisOutput" style="display: none;"></div>
 
             </div>
 
@@ -68,6 +69,293 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+<!-- ===== Embedded Script for gap_analysis.html ===== -->
+<script>
+/*
+  Gap Analysis script for RiSync
+  - reads 'employees' from localStorage (expected format: [{name, designation, experience, skills:{SkillName: proficiency}}])
+  - REQUIRED_SKILLS defines target roles and required proficiency (1-5)
+  - LMS_MODULES maps proficiency gaps to suggested learning modules
+*/
+
+// ---------- Config: Roles & LMS ----------
+const REQUIRED_SKILLS = {
+  'Senior Software Engineer': {
+    'JavaScript': 5,
+    'React': 5,
+    'Node.js': 4,
+    'Cloud Computing': 3,
+    'Data Structures': 4
+  },
+  'Team Lead': {
+    'Project Management': 5,
+    'Communication': 4,
+    'Mentorship': 4,
+    'Node.js': 3,
+    'Agile Methodology': 5
+  },
+  'UX Designer': {
+    'Figma': 5,
+    'User Research': 4,
+    'Prototyping': 5,
+    'HTML/CSS': 3,
+    'Visual Design': 4
+  },
+  'AI Specialist': {
+    'Python': 5,
+    'Machine Learning': 4,
+    'Statistical Analysis': 4,
+    'Data Structures': 3
+  },
+  'Sr. Manager': {
+    'Project Management': 5,
+    'Communication': 5,
+    'Leadership': 4,
+    'Strategic Planning': 4,
+    'Budgeting': 3
+  }
+};
+
+const LMS_MODULES = {
+  1: 'Foundation Course (LMS-101)',
+  2: 'Intermediate Workshop (LMS-202)',
+  3: 'Advanced Certification (LMS-303)',
+  4: 'Expert Masterclass (LMS-404)',
+  5: 'External Specialization (LMS-505)'
+};
+
+// ---------- Utilities ----------
+function getEmployees() {
+  try {
+    return JSON.parse(localStorage.getItem('employees')) || [];
+  } catch (e) {
+    console.warn('Could not parse employees from localStorage', e);
+    return [];
+  }
+}
+
+function downloadCSV(filename, rows) {
+  const csvContent = rows.map(r => r.map(c => {
+    // basic CSV escaping
+    if (typeof c === 'string' && (c.includes(',') || c.includes('"') || c.includes('\n'))) {
+      return '"' + c.replace(/"/g, '""') + '"';
+    }
+    return c;
+  }).join(',')).join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ---------- DOM helpers ----------
+function el(id) { return document.getElementById(id); }
+
+function clearOutputs() {
+  el('skillsOutput').style.display = 'none';
+  el('skillsOutput').innerHTML = '';
+  el('gapAnalysisOutput').style.display = 'none';
+  el('gapAnalysisOutput').innerHTML = '';
+}
+
+// ---------- Populate dropdowns ----------
+function populateEmployeeDropdown() {
+  const employees = getEmployees();
+  const sel = el('analysisEmployee');
+  sel.innerHTML = '<option value="">-- Select Employee --</option>';
+  employees.forEach(emp => {
+    const opt = document.createElement('option');
+    opt.value = emp.name;
+    opt.textContent = emp.name + (emp.designation ? ' — ' + emp.designation : '');
+    sel.appendChild(opt);
+  });
+
+  if (employees.length === 0) {
+    sel.innerHTML = '<option value="">-- No employees found. Add via Employee Skills page --</option>';
+  }
+}
+
+function populateTargetRoleDropdown() {
+  const sel = el('targetRole');
+  sel.innerHTML = '<option value="">-- Select Aspiring Role --</option>';
+  Object.keys(REQUIRED_SKILLS).sort().forEach(role => {
+    const opt = document.createElement('option');
+    opt.value = role;
+    opt.textContent = role;
+    sel.appendChild(opt);
+  });
+}
+
+// ---------- Display employee skills ----------
+function displayEmployeeSkills() {
+  const name = el('analysisEmployee').value;
+  const out = el('skillsOutput');
+  out.innerHTML = '';
+  out.style.display = 'none';
+
+  if (!name) return;
+
+  const employees = getEmployees();
+  const emp = employees.find(e => e.name === name);
+  if (!emp) {
+    out.innerHTML = '<p>Employee not found.</p>';
+    out.style.display = 'block';
+    return;
+  }
+
+  // Build table of current skills
+  let html = '<h2>Current Skills Placement: ' + emp.name + '</h2>';
+  html += '<table class="table"><thead><tr><th>Skill</th><th>Proficiency (1-5)</th></tr></thead><tbody>';
+
+  const keys = Object.keys(emp.skills || {});
+  if (keys.length === 0) {
+    html += '<tr><td colspan="2">No skills recorded for this employee yet.</td></tr>';
+  } else {
+    keys.forEach(sk => {
+      const val = emp.skills[sk];
+      html += '<tr><td>' + sk + '</td><td>' + (isFinite(val) ? val : 0) + '</td></tr>';
+    });
+  }
+  html += '</tbody></table>';
+  out.innerHTML = html;
+  out.style.display = 'block';
+}
+
+// ---------- Gap analysis ----------
+function runGapAnalysis() {
+  const employeeName = el('analysisEmployee').value;
+  const targetRole = el('targetRole').value;
+  const outputDiv = el('gapAnalysisOutput');
+
+  outputDiv.style.display = 'none';
+  outputDiv.innerHTML = '';
+
+  if (!employeeName || !targetRole) {
+    outputDiv.style.display = 'block';
+    outputDiv.innerHTML = '<h2>Skill Gap Analysis</h2>'
+      + '<p style="color:#E64A19">Please select both an employee and an aspired role to run the analysis.</p>';
+    return;
+  }
+
+  const employees = getEmployees();
+  const employee = employees.find(e => e.name === employeeName);
+  const requiredSkills = REQUIRED_SKILLS[targetRole];
+
+  if (!employee || !requiredSkills) {
+    outputDiv.style.display = 'block';
+    outputDiv.innerHTML = '<h2>Skill Gap Analysis</h2><p class="disclaimer">Required data missing.</p>';
+    return;
+  }
+
+  // Table header
+  let html = '<h2>Skill Gap: ' + employee.name + ' → ' + targetRole + '</h2>';
+  html += '<table class="table analysis-table"><thead><tr>'
+    + '<th>Skill</th><th>Required Prof. (1-5)</th><th>Current Prof. (1-5)</th><th>Gap (Required - Current)</th><th>Recommendation</th>'
+    + '</tr></thead><tbody>';
+
+  let totalGap = 0;
+  let skillsNeedingWork = 0;
+
+  for (const skill in requiredSkills) {
+    const required = requiredSkills[skill];
+    // case-insensitive match to employee skill keys
+    const key = Object.keys(employee.skills || {}).find(k => k.toLowerCase() === skill.toLowerCase());
+    const current = key ? Number(employee.skills[key]) || 0 : 0;
+    const gap = required - current;
+    totalGap += Math.max(0, gap);
+    if (gap > 0) skillsNeedingWork++;
+
+    // Recommendation logic
+    let recommendation = 'Meets or Exceeds Requirement';
+    if (gap > 0) {
+      // pick module by how many proficiency levels are required
+      const levelsNeeded = Math.ceil(gap);
+      recommendation = LMS_MODULES[levelsNeeded] || 'Tailored Development Plan';
+    } else if (gap < 0) {
+      recommendation = 'Potential Mentor / Exceeds Role Requirement';
+    }
+
+    // row color class helper (you can also set background via inline style)
+    let rowStyle = '';
+    if (gap >= 2) rowStyle = 'style="background:#FBEAEA"'; // big gap - redish
+    else if (gap > 0) rowStyle = 'style="background:#FFF7E0"'; // small gap - yellowish
+    else rowStyle = 'style="background:#E8F7EC"'; // met or exceeded - greenish
+
+    html += '<tr ' + rowStyle + '>';
+    html += '<td>' + skill + '</td>';
+    html += '<td>' + required + '</td>';
+    html += '<td>' + current + '</td>';
+    html += '<td>' + (gap.toFixed(2)) + '</td>';
+    html += '<td>' + recommendation + '</td>';
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+
+  // Summary
+  html += '<div style="margin-top:16px; padding:12px; border-radius:8px; background:#f4f6fb;">';
+  html += '<strong>Summary:</strong> ' + skillsNeedingWork + ' skills need development. Total proficiency gap = ' + totalGap.toFixed(2) + '.';
+  html += ' Prioritize training on skills with the largest gaps (highlighted above).';
+  html += '</div>';
+
+  outputDiv.innerHTML = html;
+  outputDiv.style.display = 'block';
+  // also show current skills area
+  displayEmployeeSkills();
+}
+
+// ---------- Export function (sidebar) ----------
+function downloadSkillsData() {
+  const employees = getEmployees();
+  if (!employees || employees.length === 0) {
+    alert('No employee data to export.');
+    return;
+  }
+
+  // Build CSV rows: header then one row per employee with JSON-encoded skills
+  const rows = [['Employee Name', 'Designation', 'Experience (years)', 'Skills (JSON)']];
+  employees.forEach(emp => {
+    rows.push([emp.name || '', emp.designation || '', emp.experience || '', JSON.stringify(emp.skills || {})]);
+  });
+
+  const filename = 'RiSync_employees_' + new Date().toISOString().slice(0,19).replace(/[:T]/g,'-') + '.csv';
+  downloadCSV(filename, rows);
+}
+
+// ---------- Init ----------
+function initGapPage() {
+  populateEmployeeDropdown();
+  populateTargetRoleDropdown();
+
+  // If page is loaded from skills page and there is a selected employee in URL hash, auto-select
+  const hash = decodeURIComponent(location.hash || '');
+  if (hash.startsWith('#employee=')) {
+    const name = hash.replace('#employee=', '').trim();
+    const sel = el('analysisEmployee');
+    if (sel) {
+      sel.value = name;
+      displayEmployeeSkills();
+    }
+  }
+}
+
+// Run init on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  initGapPage();
+
+  // Defensive: if the content has placeholders / selects not yet present, try again after short delay
+  setTimeout(() => {
+    if (!el('analysisEmployee') || !el('targetRole')) return;
+    // no-op (populated already)
+  }, 300);
+});
+</script>
+
 </body>
 </html>
